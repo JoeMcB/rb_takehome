@@ -6,5 +6,11 @@ CLI_ROOT = File.join(CONFIG_ROOT, '../')
 APP_ROOT = File.join(CLI_ROOT, 'app/')
 LIB_ROOT = File.join(CLI_ROOT, 'lib/')
 
+DEBUG = true
+
 require 'bundler/setup'
 Bundler.require
+
+def debug(msg)
+  puts msg if DEBUG
+end

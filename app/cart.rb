@@ -4,4 +4,8 @@ class Cart
   def self.load(json)
     JSON::Validator.validate!(CART_SCHEMA, json)
   end
+
+  def initialize
+
+  end
 end
