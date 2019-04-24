@@ -5,7 +5,7 @@ CLI_ROOT = File.join(CONFIG_ROOT, '../')
 APP_ROOT = File.join(CLI_ROOT, 'app/')
 LIB_ROOT = File.join(CLI_ROOT, 'lib/')
 
-DEBUG = true
+DEBUG = false
 
 require 'bundler/setup'
 Bundler.require
@@ -13,3 +13,8 @@ Bundler.require
 def log(msg)
   puts msg if DEBUG
 end
+
+Dir["#{APP_ROOT}/**/*.rb"].each{ |f| 
+  log("Including #{f}")
+  require f
+}

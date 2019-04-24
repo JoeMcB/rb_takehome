@@ -14,7 +14,7 @@ class PriceList
       price_list.add_item(item)
     end
 
-    return price_list
+    price_list
   end
 
   # Standardize order we'll store and lookup up.

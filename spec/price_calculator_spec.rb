@@ -11,6 +11,8 @@ RSpec.describe PriceCalculator do
   }
 
   it 'executes' do
-    expect(PriceCalculator.execute(cart, prices)).to eq(true)
+    expect {
+      PriceCalculator.execute(cart, prices)
+    }.to output("4560\n").to_stdout
   end
 end

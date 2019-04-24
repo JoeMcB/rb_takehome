@@ -1,9 +1,9 @@
 
 module PriceCalculator
   def self.execute(cart_json, price_json)
-    Cart.load(cart_json)
-    PriceList.load(price_json)
+    price_list = PriceList.load(price_json)
+    cart = Cart.load(cart_json, price_list)
 
-    true
+    puts cart.total
   end
 end

@@ -13,7 +13,6 @@ RSpec.describe PriceList do
     describe '#load' do
       it 'loads a good price list' do
         price_list = PriceList.load(base_prices_json)
-        puts price_list.product_hash.inspect
       end
 
       it 'raises an exception on a bad cart' do
