@@ -39,42 +39,61 @@ RSpec.describe PriceList do
       pl
     }
 
+    let(:flat_item_hash){
+      JSON.parse('{
+        "product-type": "sticker",
+        "options": {
+          "size": ["xl"]
+        },
+        "base-price": 3848
+      }')
+    }
+
+    let(:simple_item_hash){
+      JSON.parse('{
+        "product-type": "hoodie",
+        "options": {
+        },
+        "base-price": 3848
+      }')
+    }
+
+    let(:complex_item_hash){
+      JSON.parse('{
+        "product-type": "hoodie",
+        "options": {
+          "size": ["small", "medium", "large"],
+          "colour": ["white", "blue"]
+        },
+        "base-price": 3848
+      }')
+    }
+
+    let(:complex_item_hash_extended){
+      JSON.parse('{
+        "product-type": "hoodie",
+        "options": {
+          "size": ["xl", "2xl"],
+          "colour": ["white", "blue"]
+        },
+        "base-price": 4130
+      }')
+    }
+
     describe '#add_item' do
       it 'adds a flat item' do
         # flat item = no options
-        item_hash = JSON.parse('{
-          "product-type": "sticker",
-          "options": {
-            "size": ["xl"]
-          },
-          "base-price": 3848
-        }')
-        price_list.add_item(item_hash)
+        price_list.add_item(flat_item_hash)
       end
 
       it 'adds a simple item' do
         # simple = 1 option
-        item_hash = JSON.parse('{
-          "product-type": "hoodie",
-          "options": {
-          },
-          "base-price": 3848
-        }')
-        price_list.add_item(item_hash)
+        price_list.add_item(simple_item_hash)
       end
 
       it 'successfully adds an complex item' do
         # complex = recursive
-
-        item_hash = JSON.parse('{
-          "product-type": "hoodie",
-          "options": {
-            "size": ["small", "medium", "large"],
-            "colour": ["white", "blue"]
-          },
-          "base-price": 3848
-        }')
-        price_list.add_item(item_hash)
+        price_list.add_item(complex_item_hash)
 
         expected_hash = {
           'hoodie' => {
@@ -91,6 +110,49 @@ RSpec.describe PriceList do
           }
         }
         expect(price_list.product_hash).to eq(expected_hash)
+      end
+
+      it 'successfully adds multiple complex item' do
+        # complex = recursive
+        price_list.add_item(complex_item_hash)
+        price_list.add_item(complex_item_hash_extended)
+
+        expected_hash = {
+          'hoodie' => {
+            'white' => {
+              'small' => 3848,
+              'medium' => 3848,
+              'large' => 3848,
+              "xl" => 4130,
+              "2xl" => 4130
+            },
+            'blue' => {
+              'small' => 3848,
+              'medium' => 3848,
+              'large' => 3848,
+              "xl" => 4130,
+              "2xl" => 4130
+            }
+          }
+        }
+        expect(price_list.product_hash).to eq(expected_hash)
+      end
+    end
+
+    describe '#get_price' do
+      it 'looks up complex item price' do
+        price_list.add_item(complex_item_hash)
+        expect(price_list.get_price('hoodie', 'colour' => 'white', 'size' => 'small')).to eq(3848)
+        expect(price_list.get_price('hoodie', 'colour' => 'blue', 'size' => 'small')).to eq(3848)
+        expect(price_list.get_price('hoodie', 'colour' => 'white', 'size' => 'large')).to eq(3848)
+      end
+
+      it 'looks up multiple complex item prices' do
+        price_list.add_item(complex_item_hash)
+        price_list.add_item(complex_item_hash_extended)
+        expect(price_list.get_price('hoodie', 'colour' => 'white', 'size' => 'small')).to eq(3848)
+        expect(price_list.get_price('hoodie', 'colour' => 'blue', 'size' => 'small')).to eq(3848)
+        expect(price_list.get_price('hoodie', 'colour' => 'white', 'size' => '2xl')).to eq(4130)
       end
     end
   end

@@ -28,6 +28,25 @@ class PriceList
     @product_hash = {}
   end
 
+  def get_price(product_type, options_hash = {})
+    current_hash = product_hash[product_type]
+
+    if options_hash.empty?
+      price = current_hash[:default]
+    else
+      heirarchy.each do |heirarchy_option_name|
+        lookup_option = options_hash[heirarchy_option_name]
+        next if lookup_option.nil?
+
+        current_hash = current_hash[lookup_option]
+      end
+      price = current_hash
+    end
+
+    raise 'Item Not Found!' if price.nil?
+    price
+  end
+
   ##
   # Load an item as defined by the schema:
   # {
@@ -45,8 +64,10 @@ class PriceList
     generated_hash = recursive_add_item(@heirarchy.dup, options, price)
 
     # Set a default price in case there are no options 
-    generated_hash = {default: generated_hash} unless generated_hash.is_a? Hash
-    @product_hash[item['product-type']].merge!(generated_hash)
+    generated_hash = { default: generated_hash } unless generated_hash.is_a? Hash
+
+    # Combine hashes via deep_merge
+    @product_hash[item['product-type']].deep_merge!(generated_hash)
   end
 
   def recursive_add_item(disposable_heirarchy, options, price, count = 1)
@@ -54,6 +75,7 @@ class PriceList
     # Base case!
     return price if disposable_heirarchy.empty?
 
+    # Iterate heirarchy until find option name for this item
     option_name = true
     until  (!options[option_name].nil? || disposable_heirarchy.empty?)
       option_name = disposable_heirarchy.shift
